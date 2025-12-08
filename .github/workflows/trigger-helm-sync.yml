@@ -1,0 +1,23 @@
+name: Trigger Helm Sync
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'kong/plugins/minio-gateway/**'
+
+jobs:
+  trigger-sync:
+    name: Trigger Helm Repository Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch sync event to helm repository
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.HELM_REPO_TOKEN }}
+          repository: PrivateAIM/helm
+          event-type: sync-kong-plugin
+          client-payload: '{"source_commit": "${{ github.sha }}", "source_ref": "${{ github.ref }}"}'
